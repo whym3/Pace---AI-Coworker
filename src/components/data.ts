@@ -1,0 +1,365 @@
+import type { Email, Pipeline, Plan, Meeting, Task, ActivityItem } from './types'
+
+export const initialEmails: Email[] = [
+  {
+    id: 'e1',
+    from: 'Priya Shah',
+    fromEmail: 'priya@northwind.io',
+    avatar: 'PS',
+    subject: 'Re: Q3 onboarding plan — feedback',
+    preview: 'Looks good overall. Two concerns about the activation funnel — can we…',
+    received: '12 min ago',
+    persona: 'pm',
+    priority: 'high',
+    draft:
+      "Hi Priya — thanks for the careful read. On the activation funnel, you're right that step 3 is over-loaded; I'll split it into a guided checklist and a separate '+invite teammates' nudge. On metrics, I'll add weekly cohort retention to the dash by Friday. Will share v2 before EOD Thursday.",
+    confidence: 0.92,
+    todos: [
+      { text: 'Split activation step 3 into checklist + invite nudge', due: 'Thu' },
+      { text: 'Add weekly cohort retention to dashboard', due: 'Fri' },
+    ],
+  },
+  {
+    id: 'e2',
+    from: 'GitHub',
+    fromEmail: 'noreply@github.com',
+    avatar: 'GH',
+    subject: '[deploy/api] PR #3421 ready for review',
+    preview: 'reviewers: you + 1 other. 12 files changed, +428 −96. CI: 1 failing check.',
+    received: '38 min ago',
+    persona: 'eng',
+    priority: 'med',
+    draft:
+      'Heads-up: 1 CI check failing on this PR (lint, payments-service). Patch suggestion drafted on the Pipelines card. Want me to comment with the suggested fix and re-request review?',
+    confidence: 0.78,
+    todos: [{ text: 'Review PR #3421 (deploy/api)', due: 'today' }],
+  },
+  {
+    id: 'e3',
+    from: 'Lena Ortiz',
+    fromEmail: 'lena@acme-partners.com',
+    avatar: 'LO',
+    subject: 'Partnership intro — 15 min next week?',
+    preview: "Hey — Marco at Northwind suggested we talk. We're building a payouts layer that…",
+    received: '1 hr ago',
+    persona: 'pm',
+    priority: 'low',
+    draft:
+      "Hi Lena — happy to chat. Marco's a great connector. I'm open Tue or Wed afternoon (PT). Sending a couple of slots via calendar — feel free to grab whatever works. Quick prep: would love a one-liner on the payouts layer + what 'partnership' looks like for you.",
+    confidence: 0.84,
+    todos: [{ text: 'Send Lena calendar slots Tue/Wed PM', due: 'today' }],
+  },
+  {
+    id: 'e4',
+    from: 'Devon Kim',
+    fromEmail: 'devon@northwind.io',
+    avatar: 'DK',
+    subject: 'oncall handoff — anything outstanding?',
+    preview: 'Taking the pager from you at 5. Anything I should know about?',
+    received: '2 hr ago',
+    persona: 'eng',
+    priority: 'med',
+    draft:
+      "Hey Devon — two things on your radar:\n1) payments-service has been flapping on the lint check (not prod). Fix queued, will land before handoff.\n2) Saw a brief blip in webhook latency around 14:20 — auto-resolved, runbook link in #ops. Nothing else open.",
+    confidence: 0.89,
+    todos: [],
+  },
+]
+
+export const initialPipelines: Pipeline[] = [
+  {
+    id: 'p1',
+    repo: 'northwind/payments-service',
+    branch: 'main',
+    status: 'failing',
+    stage: 'lint',
+    duration: '2m 14s',
+    commit: 'a3f1c92',
+    author: 'you',
+    message: 'feat(webhooks): add idempotency key passthrough',
+    failedStep: 'eslint --max-warnings=0',
+    error:
+      "src/webhooks/handler.ts:42:7  error  'idempotencyKey' is assigned a value but never used  no-unused-vars",
+    fix: {
+      title: 'Remove unused binding (or wire it through to retryPolicy)',
+      diff: [
+        { type: 'ctx', text: '  const event = await parseEvent(req);' },
+        {
+          type: 'del',
+          text: "  const idempotencyKey = req.headers['x-idempotency-key'];",
+        },
+        {
+          type: 'add',
+          text: "  const idempotencyKey = req.headers['x-idempotency-key'];",
+        },
+        { type: 'add', text: '  retryPolicy.register(idempotencyKey, event.id);' },
+      ],
+      confidence: 0.86,
+      reasoning:
+        'The header is parsed but never passed to the retry layer. Wiring it through fixes the lint AND closes an open TODO from PR #3387.',
+    },
+  },
+  {
+    id: 'p2',
+    repo: 'northwind/api',
+    branch: 'feat/cohort-retention',
+    status: 'failing',
+    stage: 'test',
+    duration: '4m 02s',
+    commit: '7b2d840',
+    author: 'priya',
+    message: 'feat: weekly cohort retention endpoint',
+    failedStep: 'pytest tests/cohort/',
+    error:
+      'tests/cohort/test_retention.py::test_week_boundary  AssertionError: expected 14, got 13',
+    fix: {
+      title: 'Off-by-one on ISO week boundary — use week.start_of() not week.day(0)',
+      diff: [
+        { type: 'ctx', text: '  def week_bucket(ts):' },
+        { type: 'del', text: '      return ts.isocalendar().week.day(0)' },
+        { type: 'add', text: '      return ts.isocalendar().week.start_of()' },
+      ],
+      confidence: 0.71,
+      reasoning:
+        'Pattern matches a similar fix in analytics-core last month. Recommend Priya review before merging — calendar logic is fiddly.',
+    },
+  },
+  {
+    id: 'p3',
+    repo: 'northwind/web',
+    branch: 'main',
+    status: 'passing',
+    stage: 'deploy',
+    duration: '6m 41s',
+    commit: '0e9a2f1',
+    author: 'devon',
+    message: 'chore: bump deps + tighten CSP',
+    failedStep: null,
+    error: null,
+    fix: null,
+  },
+  {
+    id: 'p4',
+    repo: 'northwind/payments-service',
+    branch: 'fix/refund-rounding',
+    status: 'running',
+    stage: 'test',
+    duration: '1m 08s',
+    commit: 'c12a37e',
+    author: 'you',
+    message: 'fix: round refunds in minor units',
+    failedStep: null,
+    error: null,
+    fix: null,
+  },
+]
+
+export const initialPlans: Plan[] = [
+  {
+    id: 'pl1',
+    title: 'Self-serve trial → paid conversion',
+    from: 'CEO note (Tue)',
+    status: 'spec-ready',
+    summary:
+      'Move trial users onto a paid plan without forcing a sales call. Target: 8% conversion within 14d trial window.',
+    spec: [
+      { kind: 'goal', text: 'Reduce friction between trial-end and first paid invoice.' },
+      { kind: 'screen', text: 'Day 10 in-app banner — "Pick a plan" with 2 tiers + skip.' },
+      { kind: 'screen', text: 'Plan-picker modal — usage so far, recommended tier, card capture.' },
+      { kind: 'screen', text: 'Day 14 lockout state — read-only with one-click upgrade.' },
+      { kind: 'api', text: 'POST /billing/self-serve-checkout' },
+      { kind: 'api', text: 'GET /billing/usage-recommendation' },
+      { kind: 'metric', text: 'trial→paid conversion (14d cohort)' },
+      { kind: 'metric', text: 'time-to-first-invoice' },
+    ],
+    open: ['Pricing for tier 2 not finalized', 'Legal review on auto-charge copy'],
+  },
+  {
+    id: 'pl2',
+    title: 'On-call quality of life',
+    from: 'Eng all-hands (Mon)',
+    status: 'drafting',
+    summary:
+      'Reduce pager fatigue. Group related alerts, auto-link runbooks, surface known-good fixes from past incidents.',
+    spec: [
+      { kind: 'goal', text: 'Cut alert volume per shift by 40% without missing real incidents.' },
+      { kind: 'screen', text: 'Alert grouping rules editor (per-service).' },
+      { kind: 'api', text: 'Webhook intake → grouping engine → PagerDuty.' },
+    ],
+    open: ['Need volume baseline from last 90d'],
+  },
+  {
+    id: 'pl3',
+    title: 'EU data residency',
+    from: 'Sales email (Mon)',
+    status: 'queued',
+    summary:
+      'Two enterprise prospects blocking on EU-resident storage. Need a plan, not just a promise.',
+    spec: [],
+    open: ['Awaiting architecture pre-read'],
+  },
+]
+
+export const initialMeetings: Meeting[] = [
+  {
+    id: 'm1',
+    title: 'Eng standup',
+    when: '9:30 — 9:45',
+    status: 'past',
+    attendees: ['You', 'Priya', 'Devon', 'Marco'],
+    summary:
+      'Priya wrapping cohort-retention endpoint; one off-by-one to chase. Devon on-call, two flaps overnight (both auto-resolved). Marco unblocked on webhooks PR. You: spec for self-serve trial today.',
+    actions: [
+      { who: 'Priya', text: 'fix week-boundary test', linkedTo: 'pipeline p2' },
+      { who: 'You', text: 'finalize self-serve spec', linkedTo: 'plan pl1' },
+    ],
+  },
+  {
+    id: 'm2',
+    title: 'Self-serve trial — design review',
+    when: '11:00 — 11:45',
+    status: 'live',
+    attendees: ['You', 'Mira (design)', 'Priya'],
+    summary: 'Live — Pace is taking notes.',
+    actions: [],
+  },
+  {
+    id: 'm3',
+    title: '1:1 with Lena (Acme Partners)',
+    when: '14:00 — 14:30',
+    status: 'upcoming',
+    attendees: ['You', 'Lena Ortiz'],
+    summary:
+      'Pre-read: Acme is building a payouts layer; explore overlap with our refund pipeline. Pace prepared 3 talking points + 2 open questions.',
+    actions: [],
+  },
+  {
+    id: 'm4',
+    title: 'On-call handoff (Devon)',
+    when: '17:00 — 17:15',
+    status: 'upcoming',
+    attendees: ['You', 'Devon'],
+    summary: 'Hand pager to Devon. Pace drafted a status note (see Inbox › Devon Kim).',
+    actions: [],
+  },
+]
+
+export const initialTasks: Task[] = [
+  {
+    id: 't1',
+    text: 'Split activation step 3 into checklist + invite nudge',
+    source: 'email · Priya',
+    due: 'Thu',
+    done: false,
+    persona: 'pm',
+  },
+  {
+    id: 't2',
+    text: 'Add weekly cohort retention to dashboard',
+    source: 'email · Priya',
+    due: 'Fri',
+    done: false,
+    persona: 'pm',
+  },
+  {
+    id: 't3',
+    text: 'Review PR #3421 (deploy/api)',
+    source: 'GitHub',
+    due: 'today',
+    done: false,
+    persona: 'eng',
+  },
+  {
+    id: 't4',
+    text: 'Send Lena calendar slots Tue/Wed PM',
+    source: 'email · Lena',
+    due: 'today',
+    done: false,
+    persona: 'pm',
+  },
+  {
+    id: 't5',
+    text: 'Land lint fix on payments-service',
+    source: 'pipeline · p1',
+    due: 'today',
+    done: false,
+    persona: 'eng',
+  },
+  {
+    id: 't6',
+    text: 'Pre-read: EU data residency architecture',
+    source: 'plan · pl3',
+    due: 'next wk',
+    done: false,
+    persona: 'pm',
+  },
+  {
+    id: 't7',
+    text: 'Sign off design review notes',
+    source: 'meeting · m2',
+    due: 'today',
+    done: false,
+    persona: 'pm',
+  },
+  {
+    id: 't8',
+    text: 'Reply to Marco re: webhook retry policy',
+    source: 'Teams · #payments',
+    due: 'tomorrow',
+    done: false,
+    persona: 'eng',
+  },
+  {
+    id: 't9',
+    text: 'Update runbook: webhook latency triage',
+    source: 'Teams · #ops',
+    due: 'tomorrow',
+    done: true,
+    persona: 'eng',
+  },
+]
+
+export const initialActivity: ActivityItem[] = [
+  {
+    id: 'a1',
+    when: '11:14',
+    kind: 'draft',
+    text: 'Drafted reply to Priya re: Q3 onboarding plan',
+    awaiting: true,
+  },
+  {
+    id: 'a2',
+    when: '11:02',
+    kind: 'spec',
+    text: 'Promoted CEO note → "Self-serve trial" spec (8 items)',
+    awaiting: false,
+  },
+  {
+    id: 'a3',
+    when: '10:48',
+    kind: 'fix',
+    text: 'Suggested fix for payments-service lint failure',
+    awaiting: true,
+  },
+  {
+    id: 'a4',
+    when: '10:30',
+    kind: 'notes',
+    text: 'Posted eng standup notes + 2 action items',
+    awaiting: false,
+  },
+  {
+    id: 'a5',
+    when: '09:55',
+    kind: 'task',
+    text: 'Extracted 3 tasks from Teams #payments thread',
+    awaiting: false,
+  },
+  {
+    id: 'a6',
+    when: '09:12',
+    kind: 'triage',
+    text: 'Triaged 14 overnight emails — 3 need you, 11 auto-handled',
+    awaiting: false,
+  },
+]
