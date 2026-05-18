@@ -48,6 +48,8 @@ Pace aggregates your inbox, CI/CD pipelines, meetings, and tasks into a single d
 ### Integrations (Settings Page)
 Gmail · Outlook · Microsoft Teams · Slack · GitHub · GitLab · Google Calendar · Jira · Linear · Notion · PagerDuty · Figma
 
+![Connections settings page](image%20copy.png)
+
 ---
 
 ## Tech Stack
