@@ -50,6 +50,11 @@ Gmail · Outlook · Microsoft Teams · Slack · GitHub · GitLab · Google Calen
 
 ![Connections settings page](image%20copy.png)
 
+### Agents & Models
+Pace runs as a team of specialist agents — Orchestrator, Inbox Triage, Reply Drafter, Spec Writer — each backed by a different Claude model (Haiku for speed, Sonnet for drafting, Opus for reasoning). The Orchestrator routes incoming signals to the right specialist in real time.
+
+![Agents and Models page](image%20copy%202.png)
+
 ---
 
 ## Tech Stack
