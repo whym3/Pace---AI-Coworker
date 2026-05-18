@@ -1,196 +1,116 @@
+# Pace — Your AI Coworker
 
-## Pace---AI-Coworker
+> A smart, persona-aware productivity dashboard that acts as an AI coworker for engineers and product managers.
 
-Welcome to your new TanStack Start app! 
+Pace aggregates your inbox, CI/CD pipelines, meetings, and tasks into a single dark-themed dashboard. It drafts emails, suggests pipeline fixes, converts business requirements into product specs, and surfaces action items — all with confidence scores so you stay in control.
 
-# Getting Started
+---
 
-To run this application:
+## Features
+
+### Inbox Intelligence
+- Reads incoming emails and drafts context-aware replies with AI confidence scores
+- Extracts todos automatically from email threads
+- One-click approve, edit, or discard draft actions
+
+### Pipeline Monitoring
+- Monitors CI/CD build status across repos and branches
+- Surfaces failing stages (lint / test / deploy) at a glance
+- Suggests targeted code fixes with inline diffs and confidence ratings
+
+### Plans → Spec
+- Takes a business requirement or plan and converts it into a structured product spec
+- Outputs goals, screens, APIs, and metrics
+- Tracks open questions and spec status (queued → drafting → spec-ready)
+
+### Meeting Summaries
+- Shows today's calendar with live/upcoming/past status
+- Transcribes meetings and extracts action items with assignees
+- Links meeting outcomes back to related tasks and specs
+
+### Unified Task View
+- Aggregates tasks from email, Microsoft Teams, and meetings into a single list
+- Tracks source, due date, and completion state
+
+### Activity Feed
+- Timeline of every AI-assisted action (drafts sent, specs generated, fixes applied)
+- Highlights what's awaiting your review
+
+### Customisation Panel
+- **Persona** — switch between Engineer, Manager, or Both to reorder and filter cards
+- **AI Tone** — Propose / Quiet / Confident / Proactive
+- **Look** — dark mode, six accent colours, compact / balanced / spacious density
+- **Feature toggles** — show or hide individual cards
+- Draggable panel, position is persisted across sessions
+
+### Integrations (Settings Page)
+Gmail · Outlook · Microsoft Teams · Slack · GitHub · GitLab · Google Calendar · Jira · Linear · Notion · PagerDuty · Figma
+
+---
+
+## Tech Stack
+
+| Layer | Library / Tool |
+|---|---|
+| UI | React 19 |
+| Routing | TanStack Router (file-based) |
+| Styling | Tailwind CSS 4 + custom `pace.css` |
+| Icons | Lucide React |
+| Build | Vite 8 |
+| Language | TypeScript 6 |
+| Testing | Vitest + Testing Library |
+
+---
+
+## Getting Started
 
 ```bash
 npm install
 npm run dev
 ```
 
-# Building For Production
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To build this application for production:
+---
 
-```bash
-npm run build
+## Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview the production build locally |
+| `npm run test` | Run unit tests with Vitest |
+
+---
+
+## Project Structure
+
+```
+src/
+├── App.tsx              # Root app state and layout
+├── pace.css             # Dashboard component styles
+├── routes/
+│   ├── __root.tsx       # Root layout
+│   └── index.tsx        # Home route
+└── components/
+    ├── cards.tsx         # Inbox, Pipeline, Plan, Meeting, Tasks, Activity cards
+    ├── slideovers.tsx    # Detail panels (email, pipeline, plan, meeting)
+    ├── settings.tsx      # Integrations & settings page
+    ├── tweaks-panel.tsx  # Customisation panel + useTweaks hook
+    ├── icons.tsx         # SVG icon components
+    ├── types.ts          # TypeScript interfaces
+    └── data.ts           # Mock data
 ```
 
-## Testing
+---
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+## Persona System
 
-```bash
-npm run test
-```
+Pace adjusts the dashboard layout based on your selected persona:
 
-## Styling
+- **Engineer** — Pipelines card is promoted; spec and meeting cards follow
+- **Manager** — Plans → Spec and Meetings lead; pipelines are secondary
+- **Both** — All cards shown in balanced order
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+Switch personas using the sidebar selector or the Tweaks panel.
