@@ -4,6 +4,8 @@
 
 Pace aggregates your inbox, CI/CD pipelines, meetings, and tasks into a single dark-themed dashboard. It drafts emails, suggests pipeline fixes, converts business requirements into product specs, and surfaces action items — all with confidence scores so you stay in control.
 
+![Pace dashboard homescreen](image.png)
+
 ---
 
 ## Features
