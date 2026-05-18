@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 ## Pace---AI-Coworker
 
 Welcome to your new TanStack Start app! 
